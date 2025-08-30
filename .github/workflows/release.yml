@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test --if-present
+
+      - name: Build for production
+        run: npm run build
+        env:
+          VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
+          VITE_RAPIDAPI_KEY: ${{ secrets.VITE_RAPIDAPI_KEY }}
+
+      - name: Create build archive
+        run: |
+          cd dist
+          tar -czf ../movie-music-explorer-${{ github.ref_name }}.tar.gz .
+          cd ..
+          zip -r movie-music-explorer-${{ github.ref_name }}.zip dist/
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Gerar changelog automático baseado nos commits
+          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %s (%h)" --no-merges > CHANGELOG.md
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## Changes in this Release
+            ${{ steps.changelog.outputs.changelog }}
+
+            ## 🚀 Installation
+
+            ### Option 1: Download and Extract
+            1. Download the archive below
+            2. Extract to your web server
+            3. Configure your API keys in the environment variables
+
+            ### Option 2: Clone and Build
+            ```bash
+            git clone https://github.com/${{ github.repository }}.git
+            cd movie-music-explorer
+            git checkout ${{ github.ref_name }}
+            npm install
+            npm run build
+            ```
+
+            ## 📋 Requirements
+            - Modern web browser with JavaScript enabled
+            - TMDB API key
+            - RapidAPI key for Deezer
+
+            See the [README.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/README.md) for detailed setup instructions.
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./movie-music-explorer-${{ github.ref_name }}.tar.gz
+          asset_name: movie-music-explorer-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload ZIP Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./movie-music-explorer-${{ github.ref_name }}.zip
+          asset_name: movie-music-explorer-${{ github.ref_name }}.zip
+          asset_content_type: application/zip
+
+      - name: Deploy to production
+        if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, 'beta') && !contains(github.ref, 'alpha')
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          cname: your-production-domain.com # Configure seu domínio de produção

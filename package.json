@@ -1,0 +1,27 @@
+{
+  "name": "movie-music-explorer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "echo 'Linting...' && echo 'No linter configured yet'",
+    "lint:fix": "echo 'Fixing lint issues...' && echo 'No linter configured yet'",
+    "type-check": "echo 'Type checking...' && echo 'No type checker configured yet'",
+    "test": "echo 'Running tests...' && echo 'No tests configured yet'",
+    "test:coverage": "echo 'Running tests with coverage...' && echo 'No tests configured yet'",
+    "format": "echo 'Formatting code...' && echo 'No formatter configured yet'",
+    "format:check": "echo 'Checking code format...' && echo 'No formatter configured yet'",
+    "analyze": "vite build --mode analyze && echo 'Bundle analysis complete'"
+  },
+  "dependencies": {
+    "axios": "^1.11.0",
+    "vue": "^3.5.18"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "vite": "^7.1.2"
+  }
+}

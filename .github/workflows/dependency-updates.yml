@@ -1,0 +1,107 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    # Executa toda segunda-feira às 9:00 UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch: # Permite execução manual
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Check for outdated packages
+        run: |
+          npm outdated || true
+          echo "Current package versions:"
+          npm list --depth=0
+
+      - name: Update dependencies
+        run: |
+          npm update
+          npm audit fix --force || true
+
+      - name: Run tests after update
+        run: |
+          npm ci
+          npm run test --if-present
+          npm run build
+        env:
+          VITE_TMDB_API_KEY: dummy_key_for_test
+          VITE_RAPIDAPI_KEY: dummy_key_for_test
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update dependencies"
+          title: "Automated Dependency Updates"
+          body: |
+            ## 🤖 Automated Dependency Updates
+
+            This PR contains automated dependency updates.
+
+            ### Changes
+            - Updated npm packages to latest versions
+            - Fixed security vulnerabilities if any
+
+            ### Testing
+            - ✅ Build process completed successfully
+            - ✅ Tests passed (if available)
+
+            Please review the changes before merging.
+          branch: automated/dependency-updates
+          delete-branch: true
+
+  security-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit
+        run: |
+          npm audit --json > audit-report.json || true
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: audit-report.json
+          retention-days: 30
+
+      - name: Check for high severity vulnerabilities
+        run: |
+          HIGH_VULN=$(npm audit --audit-level=high --json | jq '.metadata.vulnerabilities.high // 0')
+          CRITICAL_VULN=$(npm audit --audit-level=critical --json | jq '.metadata.vulnerabilities.critical // 0')
+
+          if [ "$HIGH_VULN" -gt 0 ] || [ "$CRITICAL_VULN" -gt 0 ]; then
+            echo "⚠️ High or critical vulnerabilities found!"
+            echo "High severity: $HIGH_VULN"
+            echo "Critical severity: $CRITICAL_VULN"
+            exit 1
+          else
+            echo "✅ No high or critical vulnerabilities found"
+          fi

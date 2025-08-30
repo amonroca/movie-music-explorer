@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "axios": "^1.11.0",
+    "terser": "^5.43.1",
     "vue": "^3.5.18"
   },
   "devDependencies": {

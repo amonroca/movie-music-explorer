@@ -47,7 +47,7 @@ You need to configure the following secrets in your GitHub repository:
 
 **Jobs:**
 
-- **Test**: Runs on Node.js 18.x and 20.x
+- **Test**: Runs on Node.js 20.x and 22.x
 
   - Install dependencies
   - Run linter and type check
@@ -128,7 +128,7 @@ Configure branch protection for `main`:
 1. Go to Settings > Pages
 2. Source: Deploy from a branch
 3. Branch: gh-pages
-4. Your site will be available at: `https://username.github.io/movie-music-explorer`
+4. Your site will be available at: `https://amonroca.github.io/movie-music-explorer`
 
 ### Vercel
 

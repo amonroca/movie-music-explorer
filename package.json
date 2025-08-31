@@ -10,8 +10,8 @@
     "lint": "echo 'Linting...' && echo 'No linter configured yet'",
     "lint:fix": "echo 'Fixing lint issues...' && echo 'No linter configured yet'",
     "type-check": "echo 'Type checking...' && echo 'No type checker configured yet'",
-    "test": "echo 'Running tests...' && echo 'No tests configured yet'",
-    "test:coverage": "echo 'Running tests with coverage...' && echo 'No tests configured yet'",
+  "test": "vitest run",
+  "test:coverage": "vitest run --coverage",
     "format": "echo 'Formatting code...' && echo 'No formatter configured yet'",
     "format:check": "echo 'Checking code format...' && echo 'No formatter configured yet'",
     "analyze": "vite build --mode analyze && echo 'Bundle analysis complete'"
@@ -23,6 +23,10 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.1.2"
+    "@vitest/ui": "^3.2.4",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^26.1.0",
+    "vite": "^7.1.2",
+    "vitest": "^3.2.4"
   }
 }

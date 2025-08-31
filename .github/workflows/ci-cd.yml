@@ -1,5 +1,10 @@
 name: CI/CD Pipeline
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 on:
   push:
     branches: [main, develop]
@@ -81,6 +86,12 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
       - name: Checkout code
         uses: actions/checkout@v5
 
@@ -104,8 +115,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-          cname: your-custom-domain.com # Opcional: substitua pelo seu domínio customizado
-
 
     # Alternativa: Deploy para Vercel
     # - name: Deploy to Vercel

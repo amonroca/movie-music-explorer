@@ -43,14 +43,24 @@ jobs:
           cd ..
           zip -r movie-music-explorer-${{ github.ref_name }}.zip dist/
 
-      - name: Generate changelog
+      #- name: Generate changelog
+      #  id: changelog
+      #  run: |
+      #    # Gerar changelog automático baseado nos commits
+      #    git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %s (%h)" --no-merges > CHANGELOG.md
+      #    echo "changelog<<EOF" >> $GITHUB_OUTPUT
+      #    cat CHANGELOG.md >> $GITHUB_OUTPUT
+      #    echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Set Changelog Output
         id: changelog
         run: |
-          # Gerar changelog automático baseado nos commits
-          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %s (%h)" --no-merges > CHANGELOG.md
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           cat CHANGELOG.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Use Changelog Output
+        run: echo "${{ steps.changelog.outputs.changelog }}"
 
       - name: Create GitHub Release
         id: create_release

@@ -52,16 +52,6 @@ jobs:
       #    cat CHANGELOG.md >> $GITHUB_OUTPUT
       #    echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Set Changelog Output
-        id: changelog
-        run: |
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          cat CHANGELOG.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Use Changelog Output
-        run: echo "${{ steps.changelog.outputs.changelog }}"
-
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
